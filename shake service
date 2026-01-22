@@ -1,0 +1,141 @@
+ShakeService.java 
+package com.yourappname; 
+import android.app.Notification; 
+import android.app.NotificationChannel; 
+import android.app.NotificationManager; 
+import android.app.Service; 
+import android.content.Context; 
+import android.content.Intent; 
+import android.hardware.Sensor; 
+import android.hardware.SensorEvent; 
+import android.hardware.SensorEventListener; 
+import android.hardware.SensorManager; 
+import android.os.Build; 
+import android.os.IBinder; 
+import android.util.Log; 
+import androidx.core.app.NotificationCompat; 
+public class ShakeService extends Service implements SensorEventListener { 
+private static final String CHANNEL_ID = "ShakeDetectionChannel"; 
+private SensorManager sensorManager; 
+private Sensor accelerometer; 
+private static final int SHAKE_THRESHOLD = 800; // Adjust sensitivity here 
+private long lastShakeTime = 0; 
+private int shakeCount = 0; 
+// For sensor change calculation 
+private float lastX, lastY, lastZ; 
+@Override 
+24 
+25 
+ 
+    public void onCreate() { 
+        super.onCreate(); 
+        createNotificationChannel(); 
+        startForeground(2, createNotification()); 
+        Notification notification = createNotification(); // Your custom method 
+        startForeground(1, notification); 
+ 
+        // Initialize SensorManager 
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE); 
+        if (sensorManager != null) { 
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER); 
+        } 
+ 
+        // Register for accelerometer sensor events 
+        if (accelerometer != null) { 
+            sensorManager.registerListener(this, accelerometer, 
+SensorManager.SENSOR_DELAY_UI); 
+        } else { 
+            Log.e("ShakeService", "Accelerometer not available!"); 
+        } 
+    } 
+ 
+    @Override 
+    public void onDestroy() { 
+        if (sensorManager != null) { 
+            sensorManager.unregisterListener(this); 
+        } 
+        super.onDestroy(); 
+    } 
+ 
+ 
+    private Notification createNotification() { 
+        return new NotificationCompat.Builder(this, CHANNEL_ID) 
+                .setContentTitle("Women's Safety App") 
+                .setContentText("Shake detection is active") 
+                .setSmallIcon(R.drawable.ic_notification) // Replace with your app icon 
+                .setPriority(NotificationCompat.PRIORITY_HIGH) 
+                .setOngoing(true) 
+                .build(); 
+    } 
+ 
+    private void createNotificationChannel() { 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { 
+            NotificationChannel serviceChannel = new NotificationChannel( 
+                    CHANNEL_ID, 
+                    "Shake Detection Service", 
+                    NotificationManager.IMPORTANCE_HIGH 
+            ); 
+26 
+ 
+            NotificationManager manager = getSystemService(NotificationManager.class); 
+            if (manager != null) { 
+                manager.createNotificationChannel(serviceChannel); 
+            } 
+        } 
+    } 
+ 
+    @Override 
+    public int onStartCommand(Intent intent, int flags, int startId) { 
+        return START_STICKY; 
+    } 
+ 
+    @Override 
+    public void onSensorChanged(SensorEvent event) { 
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) { 
+            long curTime = System.currentTimeMillis(); 
+ 
+            if ((curTime - lastShakeTime) > 100) { 
+                long diffTime = curTime - lastShakeTime; 
+                lastShakeTime = curTime; 
+ 
+                float x = event.values[0]; 
+                float y = event.values[1]; 
+                float z = event.values[2]; 
+ 
+                // Calculate the shake speed 
+                float speed = Math.abs(x + y + z - lastX - lastY - lastZ) / diffTime * 10000; 
+ 
+                // Detect shake if the speed exceeds the threshold 
+                if (speed > SHAKE_THRESHOLD) { 
+                    shakeCount++; 
+                    Log.d("ShakeService", "Shake detected: " + shakeCount); 
+                    if (shakeCount >= 5) { // Trigger SOS after 3 shakes 
+                        shakeCount = 0; 
+                        triggerSOS(); 
+                    } 
+                } 
+ 
+                // Update the last accelerometer readings 
+                lastX = x; 
+                lastY = y; 
+                lastZ = z; 
+            } 
+        } 
+    } 
+ 
+    private void triggerSOS() { 
+        Log.d("ShakeService", "Triggering SOS from Shake"); 
+// Trigger an SOS action, such as sending an SMS or showing a UI 
+Intent sosIntent = new Intent(this, MainActivity.class); 
+sosIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+sosIntent.putExtra("trigger_sos", true); 
+startActivity(sosIntent); 
+// Alternatively, you can send an SMS, make a call, or trigger other actions 
+} 
+@Override 
+public void onAccuracyChanged(Sensor sensor, int accuracy) {} 
+@Override 
+public IBinder onBind(Intent intent) { 
+return null; 
+} 
+} 
