@@ -1,0 +1,59 @@
+AndroidManifest.xml 
+<?xml version="1.0" encoding="utf-8"?> 
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+xmlns:tools="http://schemas.android.com/tools" 
+package="com.yourappname"> 
+<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/> 
+<!-- Permissions --> 
+<uses-permission android:name="android.permission.SEND_SMS" /> 
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> 
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> 
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> 
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> 
+<uses-permission android:name="android.permission.RECORD_AUDIO" /> 
+<uses-permission android:name="android.permission.READ_PHONE_STATE" /> 
+<uses-permission android:name="android.permission.RECORD_AUDIO" /> 
+<uses-permission 
+android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" /> 
+<uses-permission 
+android:name="android.permission.FOREGROUND_SERVICE_LOCATION" /> 
+<uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> 
+<uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD" 
+tools:ignore="ProtectedPermissions" /> 
+<!-- Minimum SDK --> 
+<uses-feature 
+android:name="android.hardware.telephony" 
+android:required="false" /> 
+<application 
+android:allowBackup="true" 
+android:icon="@mipmap/ic_launcher" 
+android:label="Women Safety App" 
+android:roundIcon="@mipmap/ic_launcher_round" 
+android:supportsRtl="true" 
+android:theme="@style/Theme.AppCompat.Light.DarkActionBar"> 
+<!-- Launcher Activity --> 
+<activity android:name=".MainActivity" 
+android:exported="true"> 
+<intent-filter> 
+<action android:name="android.intent.action.MAIN" /> 
+<category android:name="android.intent.category.LAUNCHER" /> 
+</intent-filter> 
+</activity> 
+<!-- Guardian Numbers Activity --> 
+<activity android:name=".GuardianNumberActivity" /> 
+<!-- Services --> 
+23 
+<service android:name=".ShakeService" android:enabled="true" android:exported="false" 
+android:foregroundServiceType="location" /> 
+<service android:name=".VoiceTriggerService" android:enabled="true" 
+android:exported="false" 
+android:foregroundServiceType="microphone"/> 
+<!-- BroadcastReceiver if needed for boot/startup --> 
+<!-- 
+<receiver android:name=".BootReceiver" android:enabled="true" android:exported="true"> 
+<intent-filter> 
+<action android:name="android.intent.action.BOOT_COMPLETED" /> 
+</intent-filter> 
+</receiver> --> 
+</application> 
+</manifest>
