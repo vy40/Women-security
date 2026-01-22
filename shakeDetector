@@ -1,0 +1,43 @@
+ShakeDetector.java 
+package com.yourappname; 
+import android.hardware.Sensor; 
+import android.hardware.SensorEvent; 
+import android.hardware.SensorEventListener; 
+public class ShakeDetector implements SensorEventListener { 
+private static final int SHAKE_THRESHOLD = 800; 
+private long lastTime; 
+private float lastX, lastY, lastZ; 
+private int shakeCount = 0; 
+private final ShakeListener listener; 
+public interface ShakeListener { 
+void onShake(); 
+} 
+public ShakeDetector(ShakeListener listener) { 
+this.listener = listener; 
+} 
+@Override 
+public void onSensorChanged(SensorEvent event) { 
+long currentTime = System.currentTimeMillis(); 
+if ((currentTime - lastTime) > 100) { 
+long diffTime = currentTime - lastTime; 
+lastTime = currentTime; 
+float x = event.values[0]; 
+float y = event.values[1]; 
+float z = event.values[2]; 
+float speed = Math.abs(x + y + z - lastX - lastY - lastZ) / diffTime * 10000; 
+if (speed > SHAKE_THRESHOLD) { 
+shakeCount++; 
+if (shakeCount >= 3) { 
+listener.onShake(); 
+shakeCount = 0; 
+} 
+} 
+15 
+lastX = x; 
+lastY = y; 
+lastZ = z; 
+} 
+} 
+@Override 
+public void onAccuracyChanged(Sensor sensor, int accuracy){} 
+}
