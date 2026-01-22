@@ -1,0 +1,87 @@
+GuardianNumberActivity.java 
+package com.yourappname; 
+import android.content.Context; 
+import android.content.SharedPreferences; 
+import android.os.Bundle; 
+import android.widget.*; 
+import androidx.appcompat.app.AppCompatActivity; 
+import java.util.ArrayList; 
+import java.util.HashSet; 
+import java.util.List; 
+import java.util.Set; 
+public class GuardianNumberActivity extends AppCompatActivity { 
+private LinearLayout guardianListLayout; 
+private EditText newNumberEditText; 
+private SharedPreferences sharedPreferences; 
+private static final String PREFS_NAME = "GuardianPrefs"; 
+private static final String KEY_NUMBERS = "GuardianNumbers"; 
+private List<String> guardianNumbers; 
+@Override 
+protected void onCreate(Bundle savedInstanceState) { 
+super.onCreate(savedInstanceState); 
+setContentView(R.layout.activity_guardian_numbers); 
+guardianListLayout = findViewById(R.id.guardianListLayout); 
+newNumberEditText = findViewById(R.id.newNumberEditText); 
+Button addButton = findViewById(R.id.addGuardianButton); 
+sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE); 
+guardianNumbers = new ArrayList<>(sharedPreferences.getStringSet(KEY_NUMBERS, new 
+HashSet<>())); 
+loadGuardianNumbers(); 
+addButton.setOnClickListener(v -> { 
+String number = newNumberEditText.getText().toString().trim(); 
+if (number.isEmpty() || number.length() < 10) { 
+Toast.makeText(this, "Enter valid number", Toast.LENGTH_SHORT).show(); 
+return; 
+} 
+if (guardianNumbers.size() >= 20) { 
+Toast.makeText(this, "Maximum 20 numbers allowed", 
+Toast.LENGTH_SHORT).show(); 
+21 
+22 
+ 
+                return; 
+            } 
+            guardianNumbers.add(number); 
+            saveNumbers(); 
+            newNumberEditText.setText(""); 
+            loadGuardianNumbers(); 
+        }); 
+    } 
+ 
+    private void loadGuardianNumbers() { 
+        guardianListLayout.removeAllViews(); 
+        for (String number : guardianNumbers) { 
+            TextView numberView = new TextView(this); 
+            numberView.setText(number); 
+            numberView.setTextSize(18f); 
+            numberView.setPadding(10, 10, 10, 10); 
+            guardianListLayout.addView(numberView); 
+        } 
+    } 
+ 
+    private void saveNumbers() { 
+        SharedPreferences.Editor editor = sharedPreferences.edit(); 
+        Set<String> set = new HashSet<>(guardianNumbers); 
+        editor.putStringSet(KEY_NUMBERS, set); 
+        editor.apply(); 
+    } 
+ 
+    public static List<String> getSavedGuardianNumbers(Context context) { 
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 
+Context.MODE_PRIVATE); 
+        return new ArrayList<>(prefs.getStringSet(KEY_NUMBERS, new HashSet<>())); 
+    } 
+} 
+ 
+strings.xml 
+ 
+<resources> 
+    <string name="app_name">WSA</string> 
+    <string name="sos">SOS</string> 
+    <string name="ManageGuardianNumbers">manageGuardiansButton</string> 
+    <string name="add_guardian">Add Guardian</string> 
+    <string name="guardian_list">Guardian List</string> 
+    <string name="enter_guardian_number">Enter guardian number</string> 
+    <string name="Women_Safety_App">Need help!</string> 
+    <string name="Saved_Guardian_Numbers">guardianListTitle</string> 
+</resources>
